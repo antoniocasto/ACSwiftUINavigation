@@ -9,7 +9,8 @@ import Observation
 import SwiftUI
 
 @Observable
-public final class Router<Tab: Hashable> {
+public final class Router {
+    
     //MARK: - Initializer
     
     public init(level: Int = 0, tabIdentifier: Tab? = nil) {
@@ -32,16 +33,16 @@ public final class Router<Tab: Hashable> {
     weak private(set) var parent: Router? = nil
     
     /// The currently selected tab in the level 0 (root) Router.
-    public private(set) var selectedTab: Tab?
+    public var selectedTab: Tab?
     
     /// Navigation stack for push presentation. Can contain any presentable destination of type Hashable.
-    public private(set) var path = NavigationPath()
+    public var path = NavigationPath()
     
     /// The currently destination presented as a sheet cover.
-    public private(set) var sheetItem: AnyIdentifiable?
+    public var sheetItem: AnyIdentifiable?
     
     /// The currently destination presented as a s full screen cover.
-    public private(set) var fullScreenItem: AnyIdentifiable?
+    public var fullScreenItem: AnyIdentifiable?
     
     //MARK: - Methods - actions
     
@@ -117,3 +118,5 @@ public final class Router<Tab: Hashable> {
         fullScreenItem = nil
     }
 }
+
+public typealias Tab = any Hashable
