@@ -92,7 +92,7 @@ public final class Router {
     /// triggering the presentation of a full screen cover in the navigation UI. Use this to display modal content
     /// in a full screen overlay above the current view hierarchy.
     public func presentFullScreen(_ route: any AppRoute) {
-        sheetItem = AnyIdentifiable(route)
+        fullScreenItem = AnyIdentifiable(route)
     }
     
     /// Selects a tab within the router hierarchy.
