@@ -93,4 +93,27 @@ public final class Router<Tab: Hashable> {
     public func presentFullScreen(_ route: any AppRoute) {
         sheetItem = AnyIdentifiable(route)
     }
+    
+    /// Selects a tab within the router hierarchy.
+    ///
+    /// - Parameter tab: The tab identifier to select.
+    ///
+    /// If called on the root (`level == 0`) router, this sets the `selectedTab` property directly.
+    /// For nested routers, this propagates the tab selection to the root router and resets this router's navigation state.
+    /// Use this method for deep linking or cross-tab navigation to programmatically switch tabs and reset local navigation.
+    public func selectTab(_ tab: Tab) {
+        if level == 0 {
+            selectedTab = tab
+            return
+        }
+        parent?.selectedTab = tab
+        // Router navigation state cleanup.
+        resetNavigation()
+    }
+    
+    private func resetNavigation() {
+        path.removeLast(path.count)
+        sheetItem = nil
+        fullScreenItem = nil
+    }
 }
