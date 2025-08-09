@@ -7,16 +7,16 @@
 
 import Foundation
 
-final class AnyIdentifiable<T: Identifiable>: Identifiable {
+final class AnyIdentifiable: Identifiable {
     //MARK: - Initializer
     
-    init(_ value: T) {
+    init<T: Identifiable>(_ value: T) {
         self.wrapped = value
     }
     
     //MARK: - Properties
     
     let id = UUID()
-    let wrapped: T
+    let wrapped: any Identifiable
     
 }
