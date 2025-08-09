@@ -56,9 +56,22 @@ public final class Router<Tab: Hashable> {
     ///
     /// Use this method to instantiate routers for nested navigation flows, such as
     /// when handling navigation within a particular tab or context.
-    func makeChildRouter(for tab: Tab? = nil) -> Router {
+    public func makeChildRouter(for tab: Tab? = nil) -> Router {
         let child = Router(level: level + 1, tabIdentifier: tab ?? tabIdentifier)
         child.parent = self
         return child
     }
+    
+    /// Pushes a new route onto the navigation stack.
+    ///
+    /// - Parameter route: The route to push, conforming to both `Hashable` and `AppRoute`.
+    ///
+    /// Use this method to navigate to a new destination within the current navigation context.
+    /// The provided route will be appended to the `path`, allowing the navigation stack to update accordingly.
+    /// This is suitable for traditional "push" style navigation where each route represents a new screen or destination.
+    public func push(_ route: any Route) {
+        path.append(route)
+    }
+    
+    public typealias Route = Hashable & AppRoute
 }
