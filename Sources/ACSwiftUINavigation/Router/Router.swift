@@ -9,7 +9,9 @@ import Observation
 import SwiftUI
 
 @Observable
-public final class Router<Tab: Hashable> {
+public final class Router {
+    public typealias Tab = any Hashable
+    
     //MARK: - Initializer
     
     public init(level: Int = 0, tabIdentifier: Tab? = nil) {
