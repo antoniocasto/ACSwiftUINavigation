@@ -1,8 +1,29 @@
+# Xcode
 .DS_Store
-/.build
-/Packages
-xcuserdata/
+build/
 DerivedData/
-.swiftpm/configuration/registries.json
-.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
-.netrc
+*.xcworkspace
+xcuserdata/
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/xcuserdata/
+
+# SwiftPM
+/.build/
+/Packages/
+
+# Playground
+timeline.xctimeline
+playground.xcworkspace
+
+# General macOS
+*.swp
+*.lock
+*.tmp
+
+# User-specific
+.idea/
+*.moved-aside
+*.xcuserstate
+
+# Swift Package Index
+.swiftpm/xcode/
