@@ -82,4 +82,15 @@ public final class Router<Tab: Hashable> {
     public func presentSheet(_ route: any AppRoute) {
         sheetItem = AnyIdentifiable(route)
     }
+    
+    /// Presents the specified route as a full screen cover.
+    ///
+    /// - Parameter route: The destination to be presented as a full screen cover. Must conform to the `AppRoute` protocol.
+    ///
+    /// This method sets the `fullScreenItem` property with an identifiable wrapper around the provided route,
+    /// triggering the presentation of a full screen cover in the navigation UI. Use this to display modal content
+    /// in a full screen overlay above the current view hierarchy.
+    public func presentFullScreen(_ route: any AppRoute) {
+        sheetItem = AnyIdentifiable(route)
+    }
 }
