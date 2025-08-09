@@ -64,14 +64,22 @@ public final class Router<Tab: Hashable> {
     
     /// Pushes a new route onto the navigation stack.
     ///
-    /// - Parameter route: The route to push, conforming to both `Hashable` and `AppRoute`.
+    /// - Parameter route: The route to be pushed onto the navigation stack. Must conform to the `AppRoute` protocol.
     ///
-    /// Use this method to navigate to a new destination within the current navigation context.
-    /// The provided route will be appended to the `path`, allowing the navigation stack to update accordingly.
-    /// This is suitable for traditional "push" style navigation where each route represents a new screen or destination.
-    public func push(_ route: any Route) {
+    /// This method appends the specified route to the navigation `path`, causing a navigation action to occur.
+    /// Use this to perform traditional push-style navigation within the current context.
+    public func push(_ route: any AppRoute) {
         path.append(route)
     }
     
-    public typealias Route = Hashable & AppRoute
+    /// Presents the specified route as a sheet.
+    ///
+    /// - Parameter route: The destination to be presented as a modal sheet. Must conform to the `AppRoute` protocol.
+    ///
+    /// This method sets the `sheetItem` property with an identifiable wrapper around the provided route,
+    /// triggering the presentation of a sheet in the navigation UI. Use this to display modal content
+    /// over the current view hierarchy.
+    public func presentSheet(_ route: any AppRoute) {
+        sheetItem = AnyIdentifiable(route)
+    }
 }
