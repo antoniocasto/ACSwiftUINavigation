@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+/// A protocol for Views representing a Router valid destination.
 protocol AppRoute {
     @ViewBuilder
     func buildView() -> AnyView
