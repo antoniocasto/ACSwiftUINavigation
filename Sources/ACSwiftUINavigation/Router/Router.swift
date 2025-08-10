@@ -8,11 +8,47 @@
 import Observation
 import SwiftUI
 
+
+/// # Router
+/// 
+/// An observable navigation controller designed to manage navigation flows within SwiftUI applications. 
+/// The `Router` class accommodates advanced navigation scenarios, supporting push-based navigation, modal sheet presentation, 
+/// full screen covers, and tab-based navigation hierarchies. 
+///
+/// `Router` is designed to enable advanced navigation patterns:
+/// - Deep linking and cross-tab navigation
+/// - Hierarchical navigation flows (parent-child router relationships)
+/// - Managing navigation stack state and active modal presentations
+/// - Programmatic tab selection
+///
+/// ## Features
+/// - Observable (supports SwiftUI data-driven navigation)
+/// - Handles push, sheet, and full screen navigation
+/// - Supports tab-based navigation and tab selection
+/// - Maintains parent-child router relationships for nested navigation flows
+///
+/// ## Usage
+/// Instantiate a root `Router` at the entry point of your app. 
+/// For nested navigation flows (e.g., inside a tab or child screen), use `makeChildRouter(for:)`.
+/// Use `navigateToRoute(_:presentationStyle:)` to perform navigation programmatically, or bind to router properties in your SwiftUI `NavigationStack`, `.sheet`, or `.fullScreenCover`.
+///
+/// ## Example
+/// ```swift
+/// let rootRouter = Router()
+/// rootRouter.navigateToRoute(ProfileRoute(userID: 123))
+/// ```
 @Observable
 public final class Router {
     
     //MARK: - Initializer
     
+    /// Initializes a new `Router` instance with the specified hierarchy level and optional tab identifier.
+    ///
+    /// - Parameters:
+    ///   - level: The hierarchy depth of this router within the navigation stack. A value of `0` indicates the root router. Defaults to `0`.
+    ///   - tabIdentifier: An optional tab identifier associated with this router instance, typically used for tab-based navigation flows. If not specified, the router is not associated with any particular tab.
+    ///
+    /// Use this initializer to create a router at a specific level in the navigation hierarchy, optionally associating it with a particular tab for deep linking or context-aware navigation.
     public init(level: Int = 0, tabIdentifier: Tab? = nil) {
         self.level = level
         self.tabIdentifier = tabIdentifier
@@ -63,35 +99,40 @@ public final class Router {
         return child
     }
     
-    /// Pushes a new route onto the navigation stack.
+    /// Navigates to the specified route using the given presentation style.
     ///
-    /// - Parameter route: The route to be pushed onto the navigation stack. Must conform to the `AppRoute` protocol.
+    /// - Parameters:
+    ///   - route: The destination conforming to `AppRoute` to navigate to.
+    ///   - presentationStyle: An optional `PresentationStyle` (e.g., `.push`, `.sheet`, `.fullScreen`). 
+    ///     If not specified, the method uses the route's default presentation style.
     ///
-    /// This method appends the specified route to the navigation `path`, causing a navigation action to occur.
-    /// Use this to perform traditional push-style navigation within the current context.
-    public func push(_ route: any AppRoute) {
+    /// This method handles navigation by determining the appropriate presentation style:
+    /// - For `.push`, the route is appended to the push navigation stack.
+    /// - For `.sheet`, the route is presented as a modal sheet.
+    /// - For `.fullScreen`, the route is shown in a full screen cover.
+    ///
+    /// Use this method to perform programmatic navigation to a route, optionally overriding its presentation style.
+    public func navigateToRoute(_ route: any AppRoute, presentationStyle: PresentationStyle? = nil) {
+        let presentationStyle = presentationStyle ?? route.presentationStyle
+        switch presentationStyle {
+        case .push:
+            push(route)
+        case .sheet:
+            presentSheet(route)
+        case .fullScreen:
+            presentFullScreen(route)
+        }
+    }
+    
+    private func push(_ route: any AppRoute) {
         path.append(route)
     }
     
-    /// Presents the specified route as a sheet.
-    ///
-    /// - Parameter route: The destination to be presented as a modal sheet. Must conform to the `AppRoute` protocol.
-    ///
-    /// This method sets the `sheetItem` property with an identifiable wrapper around the provided route,
-    /// triggering the presentation of a sheet in the navigation UI. Use this to display modal content
-    /// over the current view hierarchy.
-    public func presentSheet(_ route: any AppRoute) {
+    private func presentSheet(_ route: any AppRoute) {
         sheetItem = AnyIdentifiable(route)
     }
     
-    /// Presents the specified route as a full screen cover.
-    ///
-    /// - Parameter route: The destination to be presented as a full screen cover. Must conform to the `AppRoute` protocol.
-    ///
-    /// This method sets the `fullScreenItem` property with an identifiable wrapper around the provided route,
-    /// triggering the presentation of a full screen cover in the navigation UI. Use this to display modal content
-    /// in a full screen overlay above the current view hierarchy.
-    public func presentFullScreen(_ route: any AppRoute) {
+    private func presentFullScreen(_ route: any AppRoute) {
         fullScreenItem = AnyIdentifiable(route)
     }
     
