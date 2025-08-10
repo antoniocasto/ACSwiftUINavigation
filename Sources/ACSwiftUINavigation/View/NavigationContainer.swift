@@ -8,16 +8,21 @@
 import Observation
 import SwiftUI
 
-/// Returns the top-most presented route or screen within the navigation hierarchy managed by this container,
-/// if any exists. This property is useful for determining which view is currently at the forefront of
-/// navigation, including both stack navigation and modally presented content (sheets or full-screen covers).
+/// A container view that manages navigation state for its child views.
 ///
-/// Typical uses include access for programmatic navigation actions, detecting the current visible route,
-/// or debugging navigation state.
+/// `NavigationContainer` provides a navigation stack using a custom `Router` instance.
+/// It handles navigation paths, modal presentations (sheets and full screen covers),
+/// and injects the router into the environment for use by descendant views.
 ///
-/// - Returns: An optional value representing the current top-most route or screen, or `nil` if there is no active navigation.
-/// - Note: The actual return type may depend on the navigation and modal presentation logic implemented by the router.
-/// - Warning: Depending on routing state, the top route may be transient or not guaranteed to remain topmost after further navigation actions.
+/// Use this container to encapsulate navigation and modal flows within a specific scope,
+/// optionally providing tab-specific navigation state.
+///
+/// - Note: All navigation destinations must conform to `AppRoute`,
+///   and modal destinations must conform to both `AppRoute` and `Identifiable`.
+///
+/// - Parameters:
+///   - Content: The type of view content to display within the container.
+///
 public struct NavigationContainer<Content: View>: View {
     //MARK: - Initializer
     

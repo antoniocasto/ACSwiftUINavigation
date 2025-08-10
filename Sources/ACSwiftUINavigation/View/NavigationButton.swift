@@ -7,37 +7,38 @@
 
 import SwiftUI
 
-/// A customizable navigation button that interacts with an inherited `Router` to present destination routes using different presentation styles.
-///
-/// `NavigationButton` allows navigation to a specified destination conforming to `AppRoute`, using styles such as push, sheet, or full screen presentation.
-/// The view label is provided through a `@ViewBuilder` closure, enabling flexible button appearance.
+/// A button that triggers navigation to a specified route using a router.
+/// 
+/// Use `NavigationButton` to integrate navigation actions into your view hierarchy. When tapped, this button uses the nearest `Router` environment object to present the provided route, supporting various presentation styles such as push, sheet, or full screen cover.
+/// 
+/// - Generic Parameter:
+///   - Label: The type of view used for the button's label.
+/// 
+/// The label for the button can be fully customized using a view builder. Optionally, you can specify a custom presentation style, or allow the route's default style to be used.
 ///
 /// Example usage:
 /// ```swift
-/// NavigationButton(destination: SomeRoute()) {
-///     Text("Navigate")
+/// NavigationButton(route: MyRoute()) {
+///     Label("Navigate", systemImage: "arrow.right")
 /// }
 /// ```
 ///
-/// - Note: The button requires a `Router` to be available in the environment.
-///
-/// - Parameters:
-///   - destination: The route to navigate to, conforming to `AppRoute`.
-///   - presentationStyle: How to present the destination (push, sheet, or full screen).
-///   - label: A view builder for the button’s label.
+/// > Note: This button requires a `Router` instance to be present in the environment, typically provided at an appropriate level in your view hierarchy.
 public struct NavigationButton<Label: View>: View {
     //MARK: - Initializer
     
-    /// Creates a navigation button that presents a destination route using the specified presentation style.
+    /// Creates a navigation button configured to navigate to the specified destination route.
     ///
     /// - Parameters:
-    ///   - destination: The destination route to navigate to. Must conform to `AppRoute`.
-    ///   - presentationStyle: The way in which the destination should be presented (push, sheet, or full screen). Defaults to `.push`.
-    ///   - label: A view builder closure that generates the button's label.
-    public init(destination: any AppRoute,
-                presentationStyle: PresentationStyle = .push,
+    ///   - route: An object conforming to `AppRoute` that specifies the navigation target.
+    ///   - presentationStyle: The presentation style to use for the navigation action (e.g., push, sheet, fullScreenCover). If not provided, the route's default style is used.
+    ///   - label: A view builder that constructs the button's visual label.
+    ///
+    /// Use this initializer to create a `NavigationButton` that, when tapped, directs the router to present the given destination. The label parameter lets you customize the button's appearance.
+    public init(route: any AppRoute,
+                presentationStyle: PresentationStyle? = nil,
                 @ViewBuilder label: () -> Label) {
-        self.destination = destination
+        self.route = route
         self.presentationStyle = presentationStyle
         self.label = label()
     }
@@ -47,36 +48,15 @@ public struct NavigationButton<Label: View>: View {
     /// The inherited closest Router in the hierarchy.
     @Environment(Router.self) var router: Router
     
-    private let destination: any AppRoute
-    private let presentationStyle: PresentationStyle
+    private let route: any AppRoute
+    private let presentationStyle: PresentationStyle?
     private let label: Label
     
     public var body: some View {
         Button {
-            presentDestination()
+            router.navigateToRoute(route, presentationStyle: presentationStyle)
         } label: {
             label
         }
-    }
-    
-    //MARK: - Methods - actions
-    
-    private func presentDestination() {
-        switch presentationStyle {
-        case .push:
-            router.push(destination)
-        case .sheet:
-            router.presentSheet(destination)
-        case .fullScreen:
-            router.presentFullScreen(destination)
-        }
-    }
-}
-
-extension NavigationButton {
-    public enum PresentationStyle {
-        case push
-        case sheet
-        case fullScreen
     }
 }
