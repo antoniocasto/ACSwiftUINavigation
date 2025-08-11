@@ -47,7 +47,7 @@ public final class Router {
     ///   - tabIdentifier: An optional tab identifier associated with this router instance, typically used for tab-based navigation flows. If not specified, the router is not associated with any particular tab.
     ///
     /// Use this initializer to create a router at a specific level in the navigation hierarchy, optionally associating it with a particular tab for deep linking or context-aware navigation.
-    public init(level: Int = 0, tabIdentifier: Tab? = nil) {
+    public init(level: Int = 0, tabIdentifier: TabValue? = nil) {
         self.level = level
         self.tabIdentifier = tabIdentifier
     }
@@ -60,7 +60,7 @@ public final class Router {
     
     /// Specifies which tab the router was built for. Useful for deep linking or cross tab navigation.
     @ObservationIgnored
-    private let tabIdentifier: Tab?
+    private let tabIdentifier: TabValue?
     
     /// The parent Router in the same Router hieriarchy.
     @ObservationIgnored
@@ -71,7 +71,7 @@ public final class Router {
     private var tabRouters: [AnyHashable: Router] = [:]
     
     /// The currently selected tab in the level 0 (root) Router.
-    public var selectedTab: Tab?
+    public var selectedTab: AnyHashable?
     
     /// Navigation stack for push presentation. Can contain any presentable destination of type Hashable.
     public var path = NavigationPath()
@@ -86,12 +86,12 @@ public final class Router {
     
     /// Creates and returns a new child `Router` instance, optionally associated with a specific tab.
     ///
-    /// - Parameter tab: An optional tab identifier (`Tab`) to associate with the child router. Passing a tab identifier allows the creation of navigation hierarchies in tab-based navigation flows, such that each tab can maintain its own independent navigation stack. If not specified, the child router will inherit the current router’s tab association (if any).
+    /// - Parameter tab: An optional tab identifier (`TabValue`) to associate with the child router. Passing a tab identifier allows the creation of navigation hierarchies in tab-based navigation flows, such that each tab can maintain its own independent navigation stack. If not specified, the child router will inherit the current router’s tab association (if any).
     ///
     /// - Returns: A new `Router` instance representing a child in the navigation hierarchy. The child router’s `parent` property is automatically set to the current router. If a tab identifier is provided, the child router is registered in the parent router’s `tabRouters` dictionary using the tab as the key, enabling easy retrieval and tab-based navigation coordination.
     ///
     /// - Note: Use this method to create nested navigation contexts (such as for individual tabs or modal flows) within your SwiftUI application. When working with tab-based navigation, each tab should have its own child router created and registered with its respective tab identifier.
-    public func makeChildRouter(for tab: Tab? = nil) -> Router {
+    public func makeChildRouter(for tab: TabValue? = nil) -> Router {
         let childRouter = Router(level: level + 1, tabIdentifier: tab ?? tabIdentifier)
         childRouter.parent = self
         
@@ -154,9 +154,9 @@ public final class Router {
     /// Use this method to perform cross-tab navigation, deep linking, or to restore navigation state when switching tabs.
     ///
     /// - Note: If no child router exists for the target tab, only tab selection will occur and no additional navigation will be performed.
-    public func selectTab(_ tab: Tab, navigationRoutes routes: [any AppRoute]) {
+    public func selectTab(_ tab: TabValue, navigationRoutes routes: [any AppRoute]) {
         if level == 0 {
-            selectedTab = tab
+            selectedTab = AnyHashable(tab)
             // Builds navigation flow on child Router
             childRouter(for: tab)?.buildNavigationIfAny(routes: routes)
             return
@@ -196,9 +196,9 @@ public final class Router {
         fullScreenItem = nil
     }
     
-    private func childRouter(for tab: Tab) -> Router? {
+    private func childRouter(for tab: TabValue) -> Router? {
         tabRouters[AnyHashable(tab)]
     }
 }
 
-public typealias Tab = any Hashable
+public typealias TabValue = any Hashable
