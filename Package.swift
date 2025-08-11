@@ -16,7 +16,8 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "ACSwiftUINavigation"
+            name: "ACSwiftUINavigation",
+            path: "Sources/ACSwiftUINavigation"
         ),
         .testTarget(
             name: "ACSwiftUINavigationTests",

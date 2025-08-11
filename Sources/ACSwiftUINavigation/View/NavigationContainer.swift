@@ -49,7 +49,7 @@ public struct NavigationContainer<Content: View>: View {
         NavigationStack(path: $router.path) {
             content
                 .navigationDestination(for: AnyHashable.self) { destination in
-                    buildNavigationDestinationView(for: destination)
+                    AnyView(buildNavigationDestinationView(for: destination))
                 }
         }
         .sheet(item: $router.sheetItem) { destination in
@@ -78,7 +78,7 @@ public struct NavigationContainer<Content: View>: View {
     /// - Returns: The SwiftUI `View` associated with the provided navigation route.
     /// - Note: If the destination cannot be cast to `AppRoute`, this method triggers a runtime error.
     /// - Warning: Passing unsupported destination types will cause a fatal error.
-    private func buildNavigationDestinationView(for destination: AnyHashable) -> some View {
+    private func buildNavigationDestinationView(for destination: AnyHashable) -> any View {
         guard let route = destination.base as? any AppRoute
         else { fatalError("Implementation error: Unsupported destination type.") }
         return route.buildView()
@@ -94,7 +94,7 @@ public struct NavigationContainer<Content: View>: View {
     /// - Returns: The SwiftUI `View` associated with the provided modal route.
     /// - Note: If the destination cannot be cast to `AppRoute`, this method triggers a runtime error.
     /// - Warning: Only pass destination types that conform to `AppRoute`; passing unsupported types will cause a fatal error.
-    private func buildModalDestinationView(for destination: AnyIdentifiable) -> some View {
+    private func buildModalDestinationView(for destination: AnyIdentifiable) -> any View {
         guard let route = destination.wrapped as? any AppRoute
         else { fatalError("Implementation error: Unsupported destination type.") }
         return route.buildView()
