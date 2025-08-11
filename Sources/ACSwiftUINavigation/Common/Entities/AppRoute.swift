@@ -30,5 +30,5 @@ public protocol AppRoute: Identifiable, Hashable {
     //MARK: - Methods
     
     @ViewBuilder
-    func buildView() -> AnyView
+    func buildView() -> any View
 }
