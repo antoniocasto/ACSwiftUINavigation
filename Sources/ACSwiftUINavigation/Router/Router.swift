@@ -9,33 +9,31 @@ import Observation
 import SwiftUI
 
 
-/// # Router
-/// 
-/// An observable navigation controller designed to manage navigation flows within SwiftUI applications. 
-/// The `Router` class accommodates advanced navigation scenarios, supporting push-based navigation, modal sheet presentation, 
-/// full screen covers, and tab-based navigation hierarchies. 
+
+/// `Router` is an observable navigation coordinator for SwiftUI applications, managing hierarchical navigation flows and supporting both stack-based and tab-based navigation patterns. 
 ///
-/// `Router` is designed to enable advanced navigation patterns:
-/// - Deep linking and cross-tab navigation
-/// - Hierarchical navigation flows (parent-child router relationships)
-/// - Managing navigation stack state and active modal presentations
-/// - Programmatic tab selection
-///
-/// ## Features
-/// - Observable (supports SwiftUI data-driven navigation)
-/// - Handles push, sheet, and full screen navigation
-/// - Supports tab-based navigation and tab selection
-/// - Maintains parent-child router relationships for nested navigation flows
+/// This class enables deep linking, cross-tab routing, and context-aware navigation by allowing each tab or presentation context to maintain its own independent navigation stack. 
+/// Designed to be used as a shared environment object, the router manages navigation paths, modals, and selected tabs, supporting complex navigation flows in large applications.
 ///
 /// ## Usage
-/// Instantiate a root `Router` at the entry point of your app. 
-/// For nested navigation flows (e.g., inside a tab or child screen), use `makeChildRouter(for:)`.
-/// Use `navigateToRoute(_:presentationStyle:)` to perform navigation programmatically, or bind to router properties in your SwiftUI `NavigationStack`, `.sheet`, or `.fullScreenCover`.
+/// - Use the root `Router` (`level == 0`) to manage global navigation state, such as tab selection.
+/// - Create child routers for each tab or modal flow using `makeChildRouter(for:)`, enabling each part of the UI to have its own navigation context.
+/// - Trigger programmatic navigation using `navigateToRoute(_:presentationStyle:)`.
+/// - Support deep linking or custom navigation flows state building with `selectTab(_:navigationRoutes:)` and `buildNavigationIfAny(routes:)`.
+///
+/// ## Features
+/// - Hierarchical navigation coordination using a level-based structure.
+/// - Support for tab-based navigation, with independent stacks per tab.
+/// - Modal presentations (sheet and full screen).
+/// - Deep linking and building of multi-level navigation stacks.
+/// - Designed for SwiftUI, leveraging `@Observable` for reactive updates.
 ///
 /// ## Example
 /// ```swift
 /// let rootRouter = Router()
-/// rootRouter.navigateToRoute(ProfileRoute(userID: 123))
+/// let homeRouter = rootRouter.makeChildRouter(for: .home)
+/// homeRouter.navigateToRoute(MyHomeRoute())
+/// rootRouter.selectTab(.profile, navigationRoutes: [ProfileRoute(), SettingsRoute()])
 /// ```
 @Observable
 public final class Router {
@@ -68,6 +66,10 @@ public final class Router {
     @ObservationIgnored
     weak private(set) var parent: Router? = nil
     
+    /// Stores child routers corresponding to each tab identifier.
+    @ObservationIgnored
+    private var tabRouters: [AnyHashable: Router] = [:]
+    
     /// The currently selected tab in the level 0 (root) Router.
     public var selectedTab: Tab?
     
@@ -82,21 +84,23 @@ public final class Router {
     
     //MARK: - Methods - actions
     
-    
-    /// Creates and returns a child `Router` instance associated with the next hierarchy level.
+    /// Creates and returns a new child `Router` instance, optionally associated with a specific tab.
     ///
-    /// - Parameter tab: An optional tab identifier to associate with the child router.
-    ///   If not provided, the child router inherits the parent's `tabIdentifier`.
+    /// - Parameter tab: An optional tab identifier (`Tab`) to associate with the child router. Passing a tab identifier allows the creation of navigation hierarchies in tab-based navigation flows, such that each tab can maintain its own independent navigation stack. If not specified, the child router will inherit the current router’s tab association (if any).
     ///
-    /// - Returns: A new `Router` instance with its parent set to the current router,
-    ///   incremented hierarchy level, and the specified or inherited tab identifier.
+    /// - Returns: A new `Router` instance representing a child in the navigation hierarchy. The child router’s `parent` property is automatically set to the current router. If a tab identifier is provided, the child router is registered in the parent router’s `tabRouters` dictionary using the tab as the key, enabling easy retrieval and tab-based navigation coordination.
     ///
-    /// Use this method to instantiate routers for nested navigation flows, such as
-    /// when handling navigation within a particular tab or context.
+    /// - Note: Use this method to create nested navigation contexts (such as for individual tabs or modal flows) within your SwiftUI application. When working with tab-based navigation, each tab should have its own child router created and registered with its respective tab identifier.
     public func makeChildRouter(for tab: Tab? = nil) -> Router {
-        let child = Router(level: level + 1, tabIdentifier: tab ?? tabIdentifier)
-        child.parent = self
-        return child
+        let childRouter = Router(level: level + 1, tabIdentifier: tab ?? tabIdentifier)
+        childRouter.parent = self
+        
+        // Each Router registers one or more children.
+        if let tab = tab {
+            tabRouters[AnyHashable(tab)] = childRouter
+        }
+        
+        return childRouter
     }
     
     /// Navigates to the specified route using the given presentation style.
@@ -136,27 +140,64 @@ public final class Router {
         fullScreenItem = AnyIdentifiable(route)
     }
     
-    /// Selects a tab within the router hierarchy.
+    /// Selects a tab and optionally builds a navigation flow for that tab.
     ///
-    /// - Parameter tab: The tab identifier to select.
+    /// - Parameters:
+    ///   - tab: The tab identifier to select. This identifier is typically used in tab-based navigation patterns to represent the desired active tab.
+    ///   - routes: An array of routes (`[any AppRoute]`) representing the navigation sequence to execute for the newly selected tab. If provided, the navigation stack for the tab is configured to match the sequence of routes.
     ///
-    /// If called on the root (`level == 0`) router, this sets the `selectedTab` property directly.
-    /// For nested routers, this propagates the tab selection to the root router and resets this router's navigation state.
-    /// Use this method for deep linking or cross-tab navigation to programmatically switch tabs and reset local navigation.
-    public func selectTab(_ tab: Tab) {
+    /// This method programmatically switches to the specified tab and, if routes are provided, constructs the navigation stack for that tab.
+    ///
+    /// - If called on the root router (`level == 0`), it sets the selected tab and, if a child router exists for that tab, instructs the child router to build its navigation stack based on the provided routes.
+    /// - For non-root routers, the call is delegated up the parent chain until it reaches the root router. After delegating, the current router’s own navigation state is reset.
+    ///
+    /// Use this method to perform cross-tab navigation, deep linking, or to restore navigation state when switching tabs.
+    ///
+    /// - Note: If no child router exists for the target tab, only tab selection will occur and no additional navigation will be performed.
+    public func selectTab(_ tab: Tab, navigationRoutes routes: [any AppRoute]) {
         if level == 0 {
             selectedTab = tab
+            // Builds navigation flow on child Router
+            childRouter(for: tab)?.buildNavigationIfAny(routes: routes)
             return
         }
-        parent?.selectedTab = tab
-        // Router navigation state cleanup.
+        parent?.selectTab(tab, navigationRoutes: routes)
+        // Current Router navigation state cleanup for level 1 Routers.
         resetNavigation()
+    }
+    
+    /// Recursively builds and executes a navigation flow for the given array of routes.
+    ///
+    /// - Parameter routes: An array of routes (`[any AppRoute]`) representing the navigation sequence to execute for this router and its child routers.
+    ///
+    /// This method is typically used to programmatically construct a navigation path—including deep linking—by advancing through each route in the array:
+    /// - If the current router is associated with a tab (`tabIdentifier` is not `nil`) and there is at least one route in the array, the method:
+    ///   1. Removes and navigates to the first route using `navigateToRoute(_:)`.
+    ///   2. Attempts to find a child router for the current tab. If none exists, the current router is used.
+    ///   3. Recursively calls itself on the appropriate child router (or self) with the remaining routes.
+    ///
+    /// - Important: This method will only perform navigation if the router is associated with a tab and the routes array is not empty.
+    /// - Note: This enables multi-level navigation, such as progressing through a stack of screens or handling deep links that span nested navigation hierarchies.
+    func buildNavigationIfAny(routes: [any AppRoute]) {
+        guard let tab = tabIdentifier,
+              routes.count > 0 else { return }
+        var routes = routes
+        let routeToNavigate = routes.removeFirst()
+        
+        navigateToRoute(routeToNavigate)
+        
+        let routerToNavigate = childRouter(for: tab) ?? self
+        routerToNavigate.buildNavigationIfAny(routes: routes)
     }
     
     private func resetNavigation() {
         path.removeLast(path.count)
         sheetItem = nil
         fullScreenItem = nil
+    }
+    
+    private func childRouter(for tab: Tab) -> Router? {
+        tabRouters[AnyHashable(tab)]
     }
 }
 
