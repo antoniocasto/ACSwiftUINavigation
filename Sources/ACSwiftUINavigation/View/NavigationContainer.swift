@@ -30,9 +30,9 @@ public struct NavigationContainer<Content: View>: View {
     ///
     /// - Parameters:
     ///   - parent: The parent `Router` instance used to generate state for the current navigation container.
-    ///   - tab: An optional `Tab` specifying the tab context for the child router. Defaults to `nil`.
+    ///   - tab: An optional `TabValue` specifying the tab context for the child router. Defaults to `nil`.
     ///   - content: A `ViewBuilder` closure that provides the content view to display inside the container.
-    public init(parent: Router, tab: Tab? = nil, @ViewBuilder content: () -> Content) {
+    public init(parent: Router, tab: TabValue? = nil, @ViewBuilder content: () -> Content) {
         self._router = State(initialValue: parent.makeChildRouter(for: tab))
         self.content = content()
     }
