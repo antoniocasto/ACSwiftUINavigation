@@ -57,7 +57,7 @@ public struct NavigationContainer<Content: View>: View {
                 AnyView(buildModalDestinationView(for: destination))
             }
         }
-        .fullScreenCover(item: $router.sheetItem) { destination in
+        .fullScreenCover(item: $router.fullScreenItem) { destination in
             NavigationContainer<AnyView>(parent: router) {
                 AnyView(buildModalDestinationView(for: destination))
             }
@@ -95,7 +95,7 @@ public struct NavigationContainer<Content: View>: View {
     /// - Note: If the destination cannot be cast to `AppRoute`, this method triggers a runtime error.
     /// - Warning: Only pass destination types that conform to `AppRoute`; passing unsupported types will cause a fatal error.
     private func buildModalDestinationView(for destination: AnyIdentifiable) -> some View {
-        guard let route = destination as? any AppRoute
+        guard let route = destination.wrapped as? any AppRoute
         else { fatalError("Implementation error: Unsupported destination type.") }
         return route.buildView()
     }

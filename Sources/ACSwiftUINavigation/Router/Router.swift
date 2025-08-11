@@ -129,7 +129,7 @@ public final class Router {
     }
     
     private func push(_ route: any AppRoute) {
-        path.append(route)
+        path.append(AnyHashable(route))
     }
     
     private func presentSheet(_ route: any AppRoute) {
