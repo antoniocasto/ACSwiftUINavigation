@@ -19,21 +19,21 @@ struct ContentView: View {
     
     var body: some View {
         TabView(selection: $router.selectedTab) {
-            NavigationContainer(parent: router, tab: AppTab.home) {
-                HomeView()
-                    .navigationTitle("Home")
-            }
-            .navigationTag(AppTab.home)
-            .tabItem {
+            NavigationTab(tabId: AppTab.home)  {
+                NavigationContainer(parent: router, tab: AppTab.home) {
+                    HomeView()
+                        .navigationTitle("Home")
+                }
+            } label: {
                 Image(systemName: "house")
             }
             
-            NavigationContainer(parent: router, tab: AppTab.profile) {
-                HomeView()
-                    .navigationTitle("Profile")
-            }
-            .navigationTag(AppTab.profile)
-            .tabItem {
+            NavigationTab(tabId: AppTab.profile) {
+                NavigationContainer(parent: router, tab: AppTab.profile) {
+                    HomeView()
+                        .navigationTitle("Profile")
+                }
+            } label: {
                 Image(systemName: "person")
             }
         }

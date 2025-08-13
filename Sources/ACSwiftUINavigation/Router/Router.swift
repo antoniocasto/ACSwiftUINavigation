@@ -154,7 +154,7 @@ public final class Router {
     /// Use this method to perform cross-tab navigation, deep linking, or to restore navigation state when switching tabs.
     ///
     /// - Note: If no child router exists for the target tab, only tab selection will occur and no additional navigation will be performed.
-    public func selectTab(_ tab: TabValue, navigationRoutes routes: [any AppRoute]) {
+    public func selectTab(_ tab: TabValue, navigationRoutes routes: [any AppRoute] = []) {
         if level == 0 {
             selectedTab = AnyHashable(tab)
             // Builds navigation flow on child Router
