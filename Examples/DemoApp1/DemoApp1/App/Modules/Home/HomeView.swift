@@ -5,6 +5,7 @@
 //  Created by Antonio Casto on 11/08/25.
 //
 
+import Observation
 import ACSwiftUINavigation
 import SwiftUI
 
