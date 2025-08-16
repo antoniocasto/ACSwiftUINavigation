@@ -8,8 +8,6 @@
 import Observation
 import SwiftUI
 
-
-
 /// `Router` is an observable navigation coordinator for SwiftUI applications, managing hierarchical navigation flows and supporting both stack-based and tab-based navigation patterns. 
 ///
 /// This class enables deep linking, cross-tab routing, and context-aware navigation by allowing each tab or presentation context to maintain its own independent navigation stack. 
