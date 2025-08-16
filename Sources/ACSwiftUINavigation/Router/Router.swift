@@ -52,6 +52,11 @@ public final class Router {
     
     //MARK: - Properties
     
+    /// Wether the current Router is related to the active navigation flow. It is used to make the active Router the current entity
+    /// the only one responsible to handle deep links.
+    @ObservationIgnored
+    private var isActive = false
+    
     /// The current router level in the router heriarchy. Level 0 means the root Router.
     @ObservationIgnored
     private let level: Int
@@ -196,6 +201,18 @@ public final class Router {
     
     private func childRouter(for tab: TabValue) -> Router? {
         tabRouters[AnyHashable(tab)]
+    }
+    
+    /// Sets the active state for the current `Router` instance.
+    ///
+    /// - Parameter isActive: A Boolean value indicating whether this router should be marked as active (`true`) or inactive (`false`).
+    ///
+    /// Marking a router as active designates it as the primary handler for deep links.
+    /// Only one router instance in the navigation hierarchy should typically be active at a time to ensure correct coordination deep link events.
+    ///
+    /// - Note: This method is intended for internal use by navigation controllers or coordination logic managing the router hierarchy. Directly setting the active state can affect which router responds to navigation or deep linking actions.
+    public func setActive(_ isActive: Bool) {
+        self.isActive = isActive
     }
 }
 

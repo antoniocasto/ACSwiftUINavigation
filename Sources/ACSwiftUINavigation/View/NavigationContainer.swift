@@ -63,6 +63,12 @@ public struct NavigationContainer<Content: View>: View {
             }
         }
         .environment(router)
+        .onAppear {
+            router.setActive(true)
+        }
+        .onDisappear {
+            router.setActive(false)
+        }
     }
     
     //MARK: - Methods
