@@ -69,6 +69,9 @@ public struct NavigationContainer<Content: View>: View {
         .onDisappear {
             router.setActive(false)
         }
+        .onOpenURL { deepLink in
+            router.handleDeepLink(url: deepLink)
+        }
     }
     
     //MARK: - Methods

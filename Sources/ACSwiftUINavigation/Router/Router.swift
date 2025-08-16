@@ -214,6 +214,11 @@ public final class Router {
     public func setActive(_ isActive: Bool) {
         self.isActive = isActive
     }
+    
+    func handleDeepLink(url: URL) {
+        guard isActive else { return }
+        
+    }
 }
 
 public typealias TabValue = any Hashable
