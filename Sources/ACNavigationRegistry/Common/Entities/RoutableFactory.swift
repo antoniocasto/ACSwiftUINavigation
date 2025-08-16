@@ -7,21 +7,17 @@
 
 import ACSwiftUINavigation
 
-/// A protocol representing a factory capable of producing routes conforming to `AppRoute`.
+/// A protocol that defines a factory for creating routes conforming to `AppRoute`
+/// and providing deep link URL representations for those routes.
 ///
-/// Conforming types define an associated type `T` that must conform to `AppRoute`
-/// and implement the `makeAppRoute` method to produce an instance of that route.
+/// Conformance to `RoutableFactory` enables a type to construct instances of a specific
+/// route type and optionally provide a deep link URL string for navigation or sharing purposes.
+/// The protocol is generic over an associated `AppRoute` type, allowing flexibility in route creation
+/// and deep link handling strategies.
 ///
-/// - Note: This protocol requires conformers to be `Sendable` for use in concurrent contexts.
+/// - Note: Conforming types must be `Sendable` to ensure thread safety when used in concurrent contexts.
 ///
-/// Example usage:
-/// ```swift
-/// struct MyRouteFactory: RoutableFactory {
-///     func makeAppRoute() -> MyAppRoute {
-///         // return a concrete AppRoute
-///     }
-/// }
-/// ```
+/// - SeeAlso: `AppRoute`
 public protocol RoutableFactory: Sendable {
     associatedtype T: AppRoute
     
@@ -29,4 +25,10 @@ public protocol RoutableFactory: Sendable {
     ///
     /// - Returns: An instance of `T` conforming to `AppRoute`.
     func makeAppRoute() -> T
+    
+    /// Returns the deep link URL string associated with the given route.
+    ///
+    /// - Parameter route: An instance of the associated `AppRoute` type.
+    /// - Returns: A `String` representing the deep link URL for the given route, or `nil` if no deep link is available.
+    func deepLinkUrlStringFor(_ route: T) -> String?
 }
