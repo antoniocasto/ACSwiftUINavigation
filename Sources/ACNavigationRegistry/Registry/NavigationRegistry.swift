@@ -7,57 +7,34 @@
 
 import Foundation
 
-/// A protocol defining a registry for managing navigation-related factories, allowing the registration,
-/// resolution, removal, and clearing of factory instances by their types.
+/// A protocol for managing a registry of navigation factories identified by keys.
+/// 
+/// The `NavigationRegistry` protocol defines an interface for registering, resolving, 
+/// deleting, and clearing factories that conform to the `RoutableFactory` protocol. 
+/// Keys used for registration must conform to `Sendable`.
 ///
-/// Types conforming to `NavigationRegistry` facilitate decoupled and type-safe navigation flows by
-/// maintaining a mapping between protocol types and their corresponding factory instances. This enables
-/// dynamic resolution and lifecycle management of factories used in navigation, such as view or coordinator factories.
+/// Types conforming to this protocol can be used to manage navigation destinations,
+/// such as screens or flows, by associating them with unique registry keys.
+///
+/// - Note: The interface is fully asynchronous; all methods are marked `async`.
+///
+/// ## Associated Types
+/// - `RegistryKey`: The type used to identify factories in the registry. Must conform to `Sendable`.
+///
+/// ## Methods
+/// - `register(factory:for:)`: Registers a factory for a given key.
+/// - `resolve(factoryType:)`: Looks up and returns a factory for a given key, if present.
+/// - `deleteEntry(for:)`: Removes the factory associated with the given key.
+/// - `clear()`: Removes all registry entries.
+///
 public protocol NavigationRegistry {
-    /// Registers a factory for a specific factory type.
-    ///
-    /// - Parameters:
-    ///   - factory: The factory instance to register.
-    ///   - type: The metatype of the factory protocol for which the factory should be registered.
-    func register(factory: any RoutableFactory, for type: any RoutableFactory.Type) async
+    associatedtype RegistryKey: Sendable
     
-    /// Resolves and retrieves the factory instance for a given factory type, if it exists.
-    ///
-    /// - Parameter type: The metatype of the factory protocol to resolve.
-    /// - Returns: The resolved factory instance conforming to `RoutableFactory`, or `nil` if not found.
-    func resolve(factoryType type: any RoutableFactory.Type) async -> (any RoutableFactory)?
+    func register(factory: any RoutableFactory, for key: RegistryKey) async
     
-    /// Removes the registered factory entry for a specified factory type.
-    ///
-    /// - Parameter type: The metatype of the factory protocol whose registration should be removed.
-    func deleteEntry(for type: any RoutableFactory.Type) async
+    func resolve(factoryType key: RegistryKey) async -> (any RoutableFactory)?
     
-    /// Clears all entries from the registry, removing all registered factory instances.
+    func deleteEntry(for key: RegistryKey) async
+    
     func clear() async
-}
-
-public final actor DefaultNavigationRegistry: NavigationRegistry {
-    //MARK: - Properties
-    
-    private var registry: [ObjectIdentifier: any RoutableFactory] = [:]
-    
-    public static let shared = DefaultNavigationRegistry()
-    
-    //MARK: - Methods
-    
-    public func register(factory: any RoutableFactory, for type: any RoutableFactory.Type) async {
-        registry[ObjectIdentifier(type)] = factory
-    }
-    
-    public func resolve(factoryType type: any RoutableFactory.Type) async -> (any RoutableFactory)? {
-        registry[ObjectIdentifier(type)]
-    }
-    
-    public func deleteEntry(for type: any RoutableFactory.Type) async {
-        registry[ObjectIdentifier(type)] = nil
-    }
-    
-    public func clear() async {
-        registry.removeAll()
-    }
 }
