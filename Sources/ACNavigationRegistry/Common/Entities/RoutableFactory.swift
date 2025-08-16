@@ -5,8 +5,6 @@
 //  Created by Antonio Casto on 16/08/25.
 //
 
-import ACSwiftUINavigation
-
 /// A protocol that defines a factory for creating routes conforming to `AppRoute`
 /// and providing deep link URL representations for those routes.
 ///
@@ -19,7 +17,7 @@ import ACSwiftUINavigation
 ///
 /// - SeeAlso: `AppRoute`
 public protocol RoutableFactory: Sendable {
-    associatedtype T: AppRoute
+    associatedtype T
     
     /// Creates and returns an instance of the associated `AppRoute` type.
     ///

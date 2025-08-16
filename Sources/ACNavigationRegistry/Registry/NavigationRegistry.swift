@@ -27,7 +27,7 @@ import Foundation
 /// - `deleteEntry(for:)`: Removes the factory associated with the given key.
 /// - `clear()`: Removes all registry entries.
 ///
-public protocol NavigationRegistry {
+public protocol NavigationRegistry: AnyObject {
     associatedtype RegistryKey: Sendable
     
     func register(factory: any RoutableFactory, for key: RegistryKey) async

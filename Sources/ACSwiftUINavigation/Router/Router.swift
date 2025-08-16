@@ -5,6 +5,7 @@
 //  Created by Antonio Casto on 09/08/2025.
 //
 
+import ACNavigationRegistry
 import Observation
 import SwiftUI
 
@@ -45,7 +46,9 @@ public final class Router {
     ///   - tabIdentifier: An optional tab identifier associated with this router instance, typically used for tab-based navigation flows. If not specified, the router is not associated with any particular tab.
     ///
     /// Use this initializer to create a router at a specific level in the navigation hierarchy, optionally associating it with a particular tab for deep linking or context-aware navigation.
-    public init(level: Int = 0, tabIdentifier: TabValue? = nil) {
+    public init(level: Int = 0,
+                tabIdentifier: TabValue? = nil,
+                deepLinkRegistry: (any NavigationRegistry)? = DeepLinkNavigationRegistry.shared) {
         self.level = level
         self.tabIdentifier = tabIdentifier
     }
@@ -68,6 +71,9 @@ public final class Router {
     /// The parent Router in the same Router hieriarchy.
     @ObservationIgnored
     weak private(set) var parent: Router? = nil
+    
+    @ObservationIgnored
+    weak private var deepLinkRegistry: (any NavigationRegistry)?
     
     /// Stores child routers corresponding to each tab identifier.
     @ObservationIgnored
@@ -216,7 +222,8 @@ public final class Router {
     }
     
     func handleDeepLink(url: URL) {
-        guard isActive else { return }
+        guard let deepLinkRegistry = deepLinkRegistry as? DeepLinkNavigationRegistry,
+              isActive else { return }
         
     }
 }
