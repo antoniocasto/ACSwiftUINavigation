@@ -41,6 +41,8 @@ public final actor DefaultNavigationRegistry: NavigationRegistry {
     
     private var registry: [ObjectIdentifier: any RoutableFactory] = [:]
     
+    public static let shared = DefaultNavigationRegistry()
+    
     //MARK: - Methods
     
     public func register(factory: any RoutableFactory, for type: any RoutableFactory.Type) async {
