@@ -21,6 +21,7 @@ let package = Package(
         ),
         .target(
             name: "ACNavigationRegistry",
+            dependencies: ["ACSwiftUINavigation"],
             path: "Sources/ACNavigationRegistry"
         ),
         .testTarget(
