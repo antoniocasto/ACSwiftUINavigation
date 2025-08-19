@@ -5,7 +5,6 @@
 //  Created by Antonio Casto on 09/08/2025.
 //
 
-import ACNavigationRegistry
 import Observation
 import SwiftUI
 
@@ -70,9 +69,6 @@ public final class Router {
     /// The parent Router in the same Router hieriarchy.
     @ObservationIgnored
     weak private(set) var parent: Router? = nil
-    
-    @ObservationIgnored
-    weak private var deepLinkRegistry: (any NavigationRegistry)?
     
     /// Stores child routers corresponding to each tab identifier.
     @ObservationIgnored
