@@ -70,7 +70,6 @@ public struct NavigationContainer<Content: View>: View {
             router.setActive(false)
         }
         .onOpenURL { deepLink in
-            router.handleDeepLink(url: deepLink)
         }
     }
     

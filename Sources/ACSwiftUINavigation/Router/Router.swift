@@ -47,8 +47,7 @@ public final class Router {
     ///
     /// Use this initializer to create a router at a specific level in the navigation hierarchy, optionally associating it with a particular tab for deep linking or context-aware navigation.
     public init(level: Int = 0,
-                tabIdentifier: TabValue? = nil,
-                deepLinkRegistry: (any NavigationRegistry)? = DeepLinkNavigationRegistry.shared) {
+                tabIdentifier: TabValue? = nil) {
         self.level = level
         self.tabIdentifier = tabIdentifier
     }
@@ -219,12 +218,6 @@ public final class Router {
     /// - Note: This method is intended for internal use by navigation controllers or coordination logic managing the router hierarchy. Directly setting the active state can affect which router responds to navigation or deep linking actions.
     public func setActive(_ isActive: Bool) {
         self.isActive = isActive
-    }
-    
-    func handleDeepLink(url: URL) {
-        guard let deepLinkRegistry = deepLinkRegistry as? DeepLinkNavigationRegistry,
-              isActive else { return }
-        
     }
 }
 
