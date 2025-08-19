@@ -6,46 +6,35 @@
 //
 
 import Foundation
+import ACSwiftUINavigation
 
-/// An actor-based default implementation of a navigation registry for managing `RoutableFactory` instances.
-///
-/// `DefaultNavigationRegistry` maintains a mapping between object identifiers and corresponding `RoutableFactory`
-/// instances. It provides thread-safe (concurrent) registration, lookup, and deletion operations using Swift's actor model.
-/// It is intended to be used as a singleton, accessible via the `shared` property.
-///
-/// Use this registry to register, resolve, and remove navigation factories dynamically at runtime.
-/// All operations are asynchronous and isolated to the actor context.
-///
-/// Example usage:
-/// ```swift
-/// await DefaultNavigationRegistry.shared.register(factory: MyFactory(), for: MyFactory.self)
-/// let factory = await DefaultNavigationRegistry.shared.resolve(factoryType: MyFactory.self)
-/// await DefaultNavigationRegistry.shared.deleteEntry(for: MyFactory.self)
-/// await DefaultNavigationRegistry.shared.clear()
-/// ```
-///
-/// - Note: This registry uses `ObjectIdentifier` as the key for uniquely identifying factory types.
-///
-/// - SeeAlso: `NavigationRegistry`, `RoutableFactory`
 public final actor DefaultNavigationRegistry: NavigationRegistry {
     //MARK: - Properties
     
-    private var registry: [ObjectIdentifier: any RoutableFactory] = [:]
+    private var registry: [ObjectIdentifier: Any] = [:]
     
     public static let shared = DefaultNavigationRegistry()
     
     //MARK: - Methods
     
-    public func register(factory: any RoutableFactory, for key: any RoutableFactory.Type) async {
-        registry[ObjectIdentifier(key)] = factory
+    public func register<R: AppRoute>(builder: @Sendable @escaping (R.InputPayload) -> R, for routeType: R.Type) async {
+        let key = ObjectIdentifier(routeType)
+        assert(registry[key] == nil, "Error: Builder for \(R.Type.self) already registered in DefaultNavigationRegistry")
+        registry[key] = { (input: R.InputPayload) -> R in
+            builder(input)
+        }
     }
     
-    public func resolve(factoryType key: any RoutableFactory.Type) async -> (any RoutableFactory)? {
-        registry[ObjectIdentifier(key)]
+    public func resolve<R: AppRoute>(routeType: R.Type, inputPayload: R.InputPayload) async -> R? {
+        let key = ObjectIdentifier(routeType)
+        let builder = registry[key] as? (R.InputPayload) -> R
+        return builder?(inputPayload)
     }
     
-    public func deleteEntry(for key: any RoutableFactory.Type) async {
-        registry[ObjectIdentifier(key)] = nil
+    public func deleteEntry<R: AppRoute>(routeType: R.Type) async {
+        let key = ObjectIdentifier(routeType)
+        assert(registry[key] != nil, "Error: Builder for \(R.Type.self) not registered in DefaultNavigationRegistry")
+        registry.removeValue(forKey: key)
     }
     
     public func clear() async {

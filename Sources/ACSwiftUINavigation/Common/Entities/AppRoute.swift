@@ -8,8 +8,8 @@
 import SwiftUI
 
 
-public protocol AppRoute: Identifiable, Hashable {
-    associatedtype InputPayload
+public protocol AppRoute: Identifiable, Hashable, Sendable {
+    associatedtype InputPayload: Sendable
     
     //MARK: - Properties
     
