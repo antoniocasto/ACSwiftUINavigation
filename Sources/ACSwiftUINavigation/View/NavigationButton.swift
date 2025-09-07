@@ -7,10 +7,10 @@
 
 import SwiftUI
 
-/// A button that triggers navigation to a specified route using a router.
-/// 
-/// Use `NavigationButton` to integrate navigation actions into your view hierarchy. When tapped, this button uses the nearest `Router` environment object to present the provided route, supporting various presentation styles such as push, sheet, or full screen cover.
-/// 
+/// A button that triggers navigation to a specified route using a NavigationRouter.
+///
+/// Use `NavigationButton` to integrate navigation actions into your view hierarchy. When tapped, this button uses the nearest `NavigationRouter` environment object to present the provided route, supporting various presentation styles such as push, sheet, or full screen cover.
+///
 /// - Generic Parameter:
 ///   - Label: The type of view used for the button's label.
 /// 
@@ -23,9 +23,9 @@ import SwiftUI
 /// }
 /// ```
 ///
-/// > Note: This button requires a `Router` instance to be present in the environment, typically provided at an appropriate level in your view hierarchy.
+/// > Note: This button requires a `NavigationRouter` instance to be present in the environment, typically provided at an appropriate level in your view hierarchy.
 public struct NavigationButton<Label: View>: View {
-    //MARK: - Initializer
+    // MARK: - Initializer
     
     /// Creates a navigation button configured to navigate to the specified destination route.
     ///
@@ -43,10 +43,10 @@ public struct NavigationButton<Label: View>: View {
         self.label = label()
     }
     
-    //MARK: - Properties
+    // MARK: - Properties
     
-    /// The inherited closest Router in the hierarchy.
-    @Environment(Router.self) var router: Router
+    /// The inherited closest NavigationRouter in the hierarchy.
+    @Environment(NavigationRouter.self) var router: NavigationRouter
     
     private let route: any AppRoute
     private let presentationStyle: PresentationStyle?

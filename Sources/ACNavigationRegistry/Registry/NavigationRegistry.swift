@@ -6,58 +6,37 @@
 //
 
 import Foundation
+import ACSwiftUINavigation
 
-/// A protocol defining a registry for managing navigation-related factories, allowing the registration,
-/// resolution, removal, and clearing of factory instances by their types.
+
+/// A protocol defining a registry for managing navigation routes within an application.
 ///
-/// Types conforming to `NavigationRegistry` facilitate decoupled and type-safe navigation flows by
-/// maintaining a mapping between protocol types and their corresponding factory instances. This enables
-/// dynamic resolution and lifecycle management of factories used in navigation, such as view or coordinator factories.
-public protocol NavigationRegistry {
-    /// Registers a factory for a specific factory type.
+/// `NavigationRegistry` allows dynamic registration, resolution, and management of navigation routes conforming to the `AppRoute` protocol. 
+/// Implementers can register route builders, resolve routes with input payloads, delete specific route entries, or clear the registry entirely.
+/// 
+/// All methods are asynchronous and designed to be used in concurrent contexts.
+public protocol NavigationRegistry: AnyObject {
+    /// Registers a builder closure for a specific route type.
     ///
     /// - Parameters:
-    ///   - factory: The factory instance to register.
-    ///   - type: The metatype of the factory protocol for which the factory should be registered.
-    func register(factory: any RoutableFactory, for type: any RoutableFactory.Type) async
+    ///   - builder: A closure that takes an input payload and returns an instance of the route.
+    ///   - routeType: The type of the route being registered.
+    /// - Note: The builder closure should be `@Sendable` to allow safe usage in concurrent environments.
+    func register<R: AppRoute>(builder: @Sendable @escaping (R.InputPayload) -> R, for routeType: R.Type) async
     
-    /// Resolves and retrieves the factory instance for a given factory type, if it exists.
+    /// Resolves an instance of a registered route for the provided input payload.
     ///
-    /// - Parameter type: The metatype of the factory protocol to resolve.
-    /// - Returns: The resolved factory instance conforming to `RoutableFactory`, or `nil` if not found.
-    func resolve(factoryType type: any RoutableFactory.Type) async -> (any RoutableFactory)?
+    /// - Parameters:
+    ///   - routeType: The type of the route to resolve.
+    ///   - inputPayload: The payload to use for route creation.
+    /// - Returns: An instance of the registered route if found; otherwise, nil.
+    func resolve<R: AppRoute>(routeType: R.Type, inputPayload: R.InputPayload) async -> R?
     
-    /// Removes the registered factory entry for a specified factory type.
+    /// Deletes a registered builder entry for the specified route type.
     ///
-    /// - Parameter type: The metatype of the factory protocol whose registration should be removed.
-    func deleteEntry(for type: any RoutableFactory.Type) async
+    /// - Parameter routeType: The type of the route whose registration should be removed.
+    func deleteEntry<R: AppRoute>(for routeType: R.Type) async
     
-    /// Clears all entries from the registry, removing all registered factory instances.
+    /// Clears all registered route builders from the registry.
     func clear() async
-}
-
-public final actor DefaultNavigationRegistry: NavigationRegistry {
-    //MARK: - Properties
-    
-    private var registry: [ObjectIdentifier: any RoutableFactory] = [:]
-    
-    public static let shared = DefaultNavigationRegistry()
-    
-    //MARK: - Methods
-    
-    public func register(factory: any RoutableFactory, for type: any RoutableFactory.Type) async {
-        registry[ObjectIdentifier(type)] = factory
-    }
-    
-    public func resolve(factoryType type: any RoutableFactory.Type) async -> (any RoutableFactory)? {
-        registry[ObjectIdentifier(type)]
-    }
-    
-    public func deleteEntry(for type: any RoutableFactory.Type) async {
-        registry[ObjectIdentifier(type)] = nil
-    }
-    
-    public func clear() async {
-        registry.removeAll()
-    }
 }
