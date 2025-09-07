@@ -51,20 +51,20 @@ public final class NavigationRouter {
     
     //MARK: - Properties
     
-    /// Wether the current Router is related to the active navigation flow. It is used to make the active Router the current entity
-    /// the only one responsible to handle deep links.
+    /// Wether the current NavigationRouter is related to the currently active navigation flow. It is used to set the current NavigationRouter active and
+    /// the only entity responsible to handle deep links.
     @ObservationIgnored
     private var isActive = false
     
-    /// The current router level in the router heriarchy. Level 0 means the root Router.
+    /// The current router level in the router heriarchy. Level 0 means the root Router and usually it is not associated with any tabs.
     @ObservationIgnored
     private let level: Int
     
-    /// Specifies which tab the router was built for. Useful for deep linking or cross tab navigation.
+    /// Specifies which tab the router was built for. Useful for deep linking or cross tab navigation. This is usually set for NavigationRouters with level greater than 0.
     @ObservationIgnored
     private let tabIdentifier: TabValue?
     
-    /// The parent Router in the same Router hieriarchy.
+    /// The parent NavigationRouter in the hieriarchy.
     @ObservationIgnored
     weak private(set) var parent: NavigationRouter? = nil
     
@@ -72,7 +72,7 @@ public final class NavigationRouter {
     @ObservationIgnored
     private var tabRouters: [AnyHashable: NavigationRouter] = [:]
     
-    /// The currently selected tab in the level 0 (root) Router.
+    /// The currently selected tab in the level 0 (root) NavigationRouter.
     public var selectedTab: AnyHashable?
     
     /// Navigation stack for push presentation. Can contain any presentable destination of type Hashable.
@@ -84,7 +84,7 @@ public final class NavigationRouter {
     /// The currently destination presented as a s full screen cover.
     public var fullScreenItem: AnyIdentifiable?
     
-    //MARK: - Methods - actions
+    //MARK: - Methods - Actions
     
     /// Creates and returns a new child `NavigationRouter` instance, optionally associated with a specific tab.
     ///
@@ -97,7 +97,7 @@ public final class NavigationRouter {
         let childRouter = NavigationRouter(level: level + 1, tabIdentifier: tab ?? tabIdentifier)
         childRouter.parent = self
         
-        // Each Router registers one or more children.
+        // Each NavigationRouter registers one or more children.
         if let tab = tab {
             tabRouters[AnyHashable(tab)] = childRouter
         }
@@ -164,7 +164,7 @@ public final class NavigationRouter {
             return
         }
         parent?.selectTab(tab, navigationRoutes: routes)
-        // Current Router navigation state cleanup for level 1 Routers.
+        // Current NavigationRouter navigation state cleanup.
         resetNavigation()
     }
     
