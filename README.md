@@ -1,5 +1,10 @@
 # ACSwiftUINavigation - SwiftUI Modular Navigation (iOS 17+)
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/3c8dad89-3966-4c3e-87c8-b5b8f7516420" 
+       alt="SwiftUI Modular Navigation Logo" width="200"/>
+</p>
+
 This repository is a **personal exercise** packaged as a Swift Package Manager (SPM) library.  
 It represents a **custom evolution** of the navigation architecture introduced by Felipe Espinoza in his [MovieCatalog](https://github.com/fespinoza/Youtube-SampleProjects/tree/movie-catalog-routing/00-routing-and-deep-links/MovieCatalog) project.  
 
@@ -68,3 +73,9 @@ This library addresses those issues by providing:
 ## DeepLinkRegistry (Planned)
 
 The `DeepLinkRegistry` will allow apps and modules to register deep link parsers separately, removing the need for a single central definition.
+
+---
+
+## Other credits
+
+- Logo created with the help of **ChatGPT (OpenAI)**.
