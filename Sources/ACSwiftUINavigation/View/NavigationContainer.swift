@@ -10,7 +10,7 @@ import SwiftUI
 
 /// A container view that manages navigation state for its child views.
 ///
-/// `NavigationContainer` provides a navigation stack using a custom `Router` instance.
+/// `NavigationContainer` provides a navigation stack using a custom `NaviagationRouter` instance.
 /// It handles navigation paths, modal presentations (sheets and full screen covers),
 /// and injects the router into the environment for use by descendant views.
 ///
@@ -26,13 +26,13 @@ import SwiftUI
 public struct NavigationContainer<Content: View>: View {
     //MARK: - Initializer
     
-    /// Initializes a new `NavigationContainer` with a parent `Router`, an optional `Tab`, and the content to display.
+    /// Initializes a new `NavigationContainer` with a parent `NaviagationRouter`, an optional `Tab`, and the content to display.
     ///
     /// - Parameters:
-    ///   - parent: The parent `Router` instance used to generate state for the current navigation container.
+    ///   - parent: The parent `NavigationRouter` instance used to generate state for the current navigation container.
     ///   - tab: An optional `TabValue` specifying the tab context for the child router. Defaults to `nil`.
     ///   - content: A `ViewBuilder` closure that provides the content view to display inside the container.
-    public init(parent: Router, tab: TabValue? = nil, @ViewBuilder content: () -> Content) {
+    public init(parent: NavigationRouter, tab: TabValue? = nil, @ViewBuilder content: () -> Content) {
         self._router = State(initialValue: parent.makeChildRouter(for: tab))
         self.content = content()
     }
@@ -40,7 +40,7 @@ public struct NavigationContainer<Content: View>: View {
     //MARK: - Properties
     
     /// The router containing the state for the current NavigationContainer
-    @State var router: Router
+    @State var router: NavigationRouter
     
     // The injected screen to be displayed.
     private let content: Content
@@ -110,7 +110,7 @@ public struct NavigationContainer<Content: View>: View {
 }
 
 #Preview {
-    @Previewable @State var router = Router()
+    @Previewable @State var router = NavigationRouter()
     NavigationContainer(parent: router) {
         Text("ContentView")
     }

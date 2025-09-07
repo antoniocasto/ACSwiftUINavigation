@@ -1,5 +1,5 @@
 //
-//  ACSwiftUINavigation.swift
+//  NavigationRouter.swift
 //  ACSwiftUINavigation
 //
 //  Created by Antonio Casto on 09/08/2025.
@@ -8,13 +8,13 @@
 import Observation
 import SwiftUI
 
-/// `Router` is an observable navigation coordinator for SwiftUI applications, managing hierarchical navigation flows and supporting both stack-based and tab-based navigation patterns. 
+/// `NavigationRouter` is an observable navigation coordinator for SwiftUI applications, managing hierarchical navigation flows and supporting  stack-based, tab-based and modal-based navigation patterns.
 ///
 /// This class enables deep linking, cross-tab routing, and context-aware navigation by allowing each tab or presentation context to maintain its own independent navigation stack. 
 /// Designed to be used as a shared environment object, the router manages navigation paths, modals, and selected tabs, supporting complex navigation flows in large applications.
 ///
 /// ## Usage
-/// - Use the root `Router` (`level == 0`) to manage global navigation state, such as tab selection.
+/// - Use the root `NavigationRouter` (`level == 0`) to manage global navigation state, such as tab selection.
 /// - Create child routers for each tab or modal flow using `makeChildRouter(for:)`, enabling each part of the UI to have its own navigation context.
 /// - Trigger programmatic navigation using `navigateToRoute(_:presentationStyle:)`.
 /// - Support deep linking or custom navigation flows state building with `selectTab(_:navigationRoutes:)` and `buildNavigationIfAny(routes:)`.
@@ -28,25 +28,23 @@ import SwiftUI
 ///
 /// ## Example
 /// ```swift
-/// let rootRouter = Router()
+/// let rootRouter = NavigationRouter()
 /// let homeRouter = rootRouter.makeChildRouter(for: .home)
 /// homeRouter.navigateToRoute(MyHomeRoute())
 /// rootRouter.selectTab(.profile, navigationRoutes: [ProfileRoute(), SettingsRoute()])
 /// ```
 @Observable
-public final class Router {
-    
+public final class NavigationRouter {
     //MARK: - Initializer
     
-    /// Initializes a new `Router` instance with the specified hierarchy level and optional tab identifier.
+    /// Initializes a new `NavigationRouter` instance with the specified hierarchy level and optional tab identifier.
     ///
     /// - Parameters:
     ///   - level: The hierarchy depth of this router within the navigation stack. A value of `0` indicates the root router. Defaults to `0`.
     ///   - tabIdentifier: An optional tab identifier associated with this router instance, typically used for tab-based navigation flows. If not specified, the router is not associated with any particular tab.
     ///
     /// Use this initializer to create a router at a specific level in the navigation hierarchy, optionally associating it with a particular tab for deep linking or context-aware navigation.
-    public init(level: Int = 0,
-                tabIdentifier: TabValue? = nil) {
+    public init(level: Int = 0, tabIdentifier: TabValue? = nil) {
         self.level = level
         self.tabIdentifier = tabIdentifier
     }
@@ -68,11 +66,11 @@ public final class Router {
     
     /// The parent Router in the same Router hieriarchy.
     @ObservationIgnored
-    weak private(set) var parent: Router? = nil
+    weak private(set) var parent: NavigationRouter? = nil
     
     /// Stores child routers corresponding to each tab identifier.
     @ObservationIgnored
-    private var tabRouters: [AnyHashable: Router] = [:]
+    private var tabRouters: [AnyHashable: NavigationRouter] = [:]
     
     /// The currently selected tab in the level 0 (root) Router.
     public var selectedTab: AnyHashable?
@@ -88,15 +86,15 @@ public final class Router {
     
     //MARK: - Methods - actions
     
-    /// Creates and returns a new child `Router` instance, optionally associated with a specific tab.
+    /// Creates and returns a new child `NavigationRouter` instance, optionally associated with a specific tab.
     ///
     /// - Parameter tab: An optional tab identifier (`TabValue`) to associate with the child router. Passing a tab identifier allows the creation of navigation hierarchies in tab-based navigation flows, such that each tab can maintain its own independent navigation stack. If not specified, the child router will inherit the current router’s tab association (if any).
     ///
-    /// - Returns: A new `Router` instance representing a child in the navigation hierarchy. The child router’s `parent` property is automatically set to the current router. If a tab identifier is provided, the child router is registered in the parent router’s `tabRouters` dictionary using the tab as the key, enabling easy retrieval and tab-based navigation coordination.
+    /// - Returns: A new `NavigationRouter` instance representing a child in the navigation hierarchy. The child router’s `parent` property is automatically set to the current router. If a tab identifier is provided, the child router is registered in the parent router’s `tabRouters` dictionary using the tab as the key, enabling easy retrieval and tab-based navigation coordination.
     ///
     /// - Note: Use this method to create nested navigation contexts (such as for individual tabs or modal flows) within your SwiftUI application. When working with tab-based navigation, each tab should have its own child router created and registered with its respective tab identifier.
-    public func makeChildRouter(for tab: TabValue? = nil) -> Router {
-        let childRouter = Router(level: level + 1, tabIdentifier: tab ?? tabIdentifier)
+    public func makeChildRouter(for tab: TabValue? = nil) -> NavigationRouter {
+        let childRouter = NavigationRouter(level: level + 1, tabIdentifier: tab ?? tabIdentifier)
         childRouter.parent = self
         
         // Each Router registers one or more children.
@@ -200,11 +198,11 @@ public final class Router {
         fullScreenItem = nil
     }
     
-    private func childRouter(for tab: TabValue) -> Router? {
+    private func childRouter(for tab: TabValue) -> NavigationRouter? {
         tabRouters[AnyHashable(tab)]
     }
     
-    /// Sets the active state for the current `Router` instance.
+    /// Sets the active state for the current `NavigationRouter` instance.
     ///
     /// - Parameter isActive: A Boolean value indicating whether this router should be marked as active (`true`) or inactive (`false`).
     ///

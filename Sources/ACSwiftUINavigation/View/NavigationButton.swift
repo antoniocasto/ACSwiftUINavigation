@@ -45,8 +45,8 @@ public struct NavigationButton<Label: View>: View {
     
     //MARK: - Properties
     
-    /// The inherited closest Router in the hierarchy.
-    @Environment(Router.self) var router: Router
+    /// The inherited closest NavigationRouter in the hierarchy.
+    @Environment(NavigationRouter.self) var router: NavigationRouter
     
     private let route: any AppRoute
     private let presentationStyle: PresentationStyle?
