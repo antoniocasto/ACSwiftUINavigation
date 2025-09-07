@@ -10,6 +10,8 @@ import Foundation
 import SwiftUI
 
 enum HomeRoute: String, AppRoute {
+    typealias InputPayload = Void
+    
     case detail
     case sheet
     case fullScreen

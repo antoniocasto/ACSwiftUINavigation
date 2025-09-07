@@ -15,7 +15,7 @@ enum AppTab {
 
 struct ContentView: View {
     
-    @State private var router = Router()
+    @State private var router = NavigationRouter()
     
     var body: some View {
         TabView(selection: $router.selectedTab) {
