@@ -8,6 +8,17 @@
 import Foundation
 import ACSwiftUINavigation
 
+/// An implementation of the `NavigationRegistry` protocol to manage navigation route builders at runtime.
+///
+/// `DefaultNavigationRegistry` provides a centralized, actor-isolated registry for registering, resolving,
+/// and removing navigation routes and their associated builder closures. It ensures type safety and
+/// thread safety by leveraging Swift's `actor` model, allowing safe usage across concurrent contexts.
+///
+/// Use the shared singleton instance via `DefaultNavigationRegistry.shared` to access the registry
+/// throughout your application.
+///
+/// - Note: This registry associates builder closures with route types conforming to `AppRoute`.
+///         Each route type may only be registered once. Attempting to register the same type again will trigger an assertion failure.
 public final actor DefaultNavigationRegistry: NavigationRegistry {
     //MARK: - Properties
     
@@ -31,7 +42,7 @@ public final actor DefaultNavigationRegistry: NavigationRegistry {
         return builder?(inputPayload)
     }
     
-    public func deleteEntry<R: AppRoute>(routeType: R.Type) async {
+    public func deleteEntry<R: AppRoute>(for routeType: R.Type) async {
         let key = ObjectIdentifier(routeType)
         assert(registry[key] != nil, "Error: Builder for \(R.Type.self) not registered in DefaultNavigationRegistry")
         registry.removeValue(forKey: key)
