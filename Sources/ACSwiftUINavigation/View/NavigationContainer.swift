@@ -10,7 +10,7 @@ import SwiftUI
 
 /// A container view that manages navigation state for its child views.
 ///
-/// `NavigationContainer` provides a navigation stack using a custom `Router` instance.
+/// `NavigationContainer` provides a navigation stack using a custom `NaviagationRouter` instance.
 /// It handles navigation paths, modal presentations (sheets and full screen covers),
 /// and injects the router into the environment for use by descendant views.
 ///
@@ -24,15 +24,15 @@ import SwiftUI
 ///   - Content: The type of view content to display within the container.
 ///
 public struct NavigationContainer<Content: View>: View {
-    //MARK: - Initializer
+    // MARK: - Initializer
     
-    /// Initializes a new `NavigationContainer` with a parent `Router`, an optional `Tab`, and the content to display.
+    /// Initializes a new `NavigationContainer` with a parent `NaviagationRouter`, an optional `Tab`, and the content to display.
     ///
     /// - Parameters:
-    ///   - parent: The parent `Router` instance used to generate state for the current navigation container.
-    ///   - tab: An optional `Tab` specifying the tab context for the child router. Defaults to `nil`.
+    ///   - parent: The parent `NavigationRouter` instance used to generate state for the current navigation container.
+    ///   - tab: An optional `TabValue` specifying the tab context for the child router. Defaults to `nil`.
     ///   - content: A `ViewBuilder` closure that provides the content view to display inside the container.
-    public init(parent: Router, tab: Tab? = nil, @ViewBuilder content: () -> Content) {
+    public init(parent: NavigationRouter, tab: TabValue? = nil, @ViewBuilder content: () -> Content) {
         self._router = State(initialValue: parent.makeChildRouter(for: tab))
         self.content = content()
     }
@@ -40,7 +40,7 @@ public struct NavigationContainer<Content: View>: View {
     //MARK: - Properties
     
     /// The router containing the state for the current NavigationContainer
-    @State var router: Router
+    @State var router: NavigationRouter
     
     // The injected screen to be displayed.
     private let content: Content
@@ -49,7 +49,7 @@ public struct NavigationContainer<Content: View>: View {
         NavigationStack(path: $router.path) {
             content
                 .navigationDestination(for: AnyHashable.self) { destination in
-                    buildNavigationDestinationView(for: destination)
+                    AnyView(buildNavigationDestinationView(for: destination))
                 }
         }
         .sheet(item: $router.sheetItem) { destination in
@@ -57,15 +57,23 @@ public struct NavigationContainer<Content: View>: View {
                 AnyView(buildModalDestinationView(for: destination))
             }
         }
-        .fullScreenCover(item: $router.sheetItem) { destination in
+        .fullScreenCover(item: $router.fullScreenItem) { destination in
             NavigationContainer<AnyView>(parent: router) {
                 AnyView(buildModalDestinationView(for: destination))
             }
         }
         .environment(router)
+        .onAppear {
+            router.setActive(true)
+        }
+        .onDisappear {
+            router.setActive(false)
+        }
+        .onOpenURL { deepLink in
+        }
     }
     
-    //MARK: - Methods
+    // MARK: - Methods
     
     /// Builds the destination view for a given navigation route.
     ///
@@ -78,9 +86,9 @@ public struct NavigationContainer<Content: View>: View {
     /// - Returns: The SwiftUI `View` associated with the provided navigation route.
     /// - Note: If the destination cannot be cast to `AppRoute`, this method triggers a runtime error.
     /// - Warning: Passing unsupported destination types will cause a fatal error.
-    private func buildNavigationDestinationView(for destination: AnyHashable) -> some View {
+    private func buildNavigationDestinationView(for destination: AnyHashable) -> any View {
         guard let route = destination.base as? any AppRoute
-        else { fatalError("Implementation error: Unsupported destination type.") }
+        else { fatalError("Implementation error: Unsupported navigation destination type.") }
         return route.buildView()
     }
     
@@ -94,15 +102,15 @@ public struct NavigationContainer<Content: View>: View {
     /// - Returns: The SwiftUI `View` associated with the provided modal route.
     /// - Note: If the destination cannot be cast to `AppRoute`, this method triggers a runtime error.
     /// - Warning: Only pass destination types that conform to `AppRoute`; passing unsupported types will cause a fatal error.
-    private func buildModalDestinationView(for destination: AnyIdentifiable) -> some View {
-        guard let route = destination as? any AppRoute
-        else { fatalError("Implementation error: Unsupported destination type.") }
+    private func buildModalDestinationView(for destination: AnyIdentifiable) -> any View {
+        guard let route = destination.wrapped as? any AppRoute
+        else { fatalError("Implementation error: Unsupported modal destination type.") }
         return route.buildView()
     }
 }
 
 #Preview {
-    @Previewable @State var router = Router()
+    @Previewable @State var router = NavigationRouter()
     NavigationContainer(parent: router) {
         Text("ContentView")
     }

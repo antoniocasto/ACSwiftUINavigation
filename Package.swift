@@ -11,12 +11,18 @@ let package = Package(
     products: [
         .library(
             name: "ACSwiftUINavigation",
-            targets: ["ACSwiftUINavigation"]
+            targets: ["ACSwiftUINavigation", "ACNavigationRegistry"]
         ),
     ],
     targets: [
         .target(
-            name: "ACSwiftUINavigation"
+            name: "ACSwiftUINavigation",
+            path: "Sources/ACSwiftUINavigation"
+        ),
+        .target(
+            name: "ACNavigationRegistry",
+            dependencies: ["ACSwiftUINavigation"],
+            path: "Sources/ACNavigationRegistry"
         ),
         .testTarget(
             name: "ACSwiftUINavigationTests",
