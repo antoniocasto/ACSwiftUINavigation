@@ -41,7 +41,7 @@ public final class NavigationRouter {
     ///
     /// - Parameters:
     ///   - level: The hierarchy depth of this router within the navigation stack. A value of `0` indicates the root router. Defaults to `0`.
-    ///   - tabIdentifier: An optional tab identifier associated with this router instance, typically used for tab-based navigation flows. If not specified, the router is not associated with any particular tab.
+    ///   - tabIdentifier: An optional tab identifier representing the tab where the navigation happens using this router instance, typically used for tab-based navigation flows. If not specified, the router is not associated with any particular tab.
     ///
     /// Use this initializer to create a router at a specific level in the navigation hierarchy, optionally associating it with a particular tab for deep linking or context-aware navigation.
     public init(level: Int = 0, tabIdentifier: TabValue? = nil) {
