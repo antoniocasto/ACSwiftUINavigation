@@ -24,7 +24,7 @@ import SwiftUI
 ///   - Content: The type of view content to display within the container.
 ///
 public struct NavigationContainer<Content: View>: View {
-    //MARK: - Initializer
+    // MARK: - Initializer
     
     /// Initializes a new `NavigationContainer` with a parent `NaviagationRouter`, an optional `Tab`, and the content to display.
     ///
@@ -73,7 +73,7 @@ public struct NavigationContainer<Content: View>: View {
         }
     }
     
-    //MARK: - Methods
+    // MARK: - Methods
     
     /// Builds the destination view for a given navigation route.
     ///
@@ -88,7 +88,7 @@ public struct NavigationContainer<Content: View>: View {
     /// - Warning: Passing unsupported destination types will cause a fatal error.
     private func buildNavigationDestinationView(for destination: AnyHashable) -> any View {
         guard let route = destination.base as? any AppRoute
-        else { fatalError("Implementation error: Unsupported destination type.") }
+        else { fatalError("Implementation error: Unsupported navigation destination type.") }
         return route.buildView()
     }
     
@@ -104,7 +104,7 @@ public struct NavigationContainer<Content: View>: View {
     /// - Warning: Only pass destination types that conform to `AppRoute`; passing unsupported types will cause a fatal error.
     private func buildModalDestinationView(for destination: AnyIdentifiable) -> any View {
         guard let route = destination.wrapped as? any AppRoute
-        else { fatalError("Implementation error: Unsupported destination type.") }
+        else { fatalError("Implementation error: Unsupported modal destination type.") }
         return route.buildView()
     }
 }
